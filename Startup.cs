@@ -17,6 +17,8 @@ namespace WebAPIEF
 {
     public class Startup
     {
+        private readonly string _MyCors = "MyCors";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -31,6 +33,29 @@ namespace WebAPIEF
 
             services.AddDbContext<WebAPIEFContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("WebAPIEFContext")));
+
+            //services.AddCors(o => o.AddPolicy("MyCors", builder =>
+            //{
+            //    builder.AllowAnyOrigin()
+            //           .AllowAnyMethod()
+            //           .AllowAnyHeader();
+            //}));
+
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: _MyCors, builder =>
+                {
+                    //builder.WithOrigins(p[0]);
+
+                    builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
+                    .AllowAnyHeader().AllowAnyMethod();
+                });
+
+            });
+
+            //services.AddCors(option => option.AddDefaultPolicy(
+            //    builder => builder.AllowAnyOrigin()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,6 +69,8 @@ namespace WebAPIEF
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(_MyCors);
 
             app.UseAuthorization();
 
